@@ -1,0 +1,74 @@
+# A股选股策略系统 - 策略配置
+
+strategies:
+  # 策略1：均线多头趋势
+  ma_trend:
+    enabled: true
+    module: "strategies.ma_trend"
+    description: "短期均线上穿长期均线，形成多头排列"
+    params:
+      ma_short: 5
+      ma_mid: 10
+      ma_long: 20
+      ma_vlong: 60
+      volume_ratio: 1.5
+    weight: 1.0
+    stop_loss: 0.05  # 止损5%
+    take_profit: 0.15  # 止盈15%
+
+  # 策略2：超跌反弹
+  oversold_rebound:
+    enabled: true
+    module: "strategies.oversold_rebound"
+    description: "股价超跌后出现止跌信号"
+    params:
+      rsi_threshold: 20
+      kdj_j_threshold: 10
+      use_boll_lower: true
+      volume_increase: true
+    weight: 0.8
+    stop_loss: 0.08
+    take_profit: 0.20
+
+  # 策略3：突破选股
+  breakout:
+    enabled: true
+    module: "strategies.breakout"
+    description: "股价突破关键压力位"
+    params:
+      days_high: 60
+      volume_ratio: 2.0
+      boll_expansion: true
+    weight: 1.2
+    stop_loss: 0.06
+    take_profit: 0.18
+
+  # 策略4：底部吸筹
+  bottom_accumulation:
+    enabled: true
+    module: "strategies.bottom_accumulation"
+    description: "主力资金流入，股价横盘筑底"
+    params:
+      obv_trend: "up"
+      volatility_threshold: 0.05
+      macd_red_grow: true
+    weight: 0.9
+    stop_loss: 0.07
+    take_profit: 0.25
+
+# 策略组合
+combined_strategies:
+  # 组合1：趋势+超跌
+  trend_and_oversold:
+    enabled: false
+    strategies: ["ma_trend", "oversold_rebound"]
+    logic: "AND"  # AND, OR, MAJORITY
+    description: "同时满足趋势和超跌条件"
+
+  # 组合2：多策略投票
+  majority_vote:
+    enabled: false
+    strategies: ["ma_trend", "oversold_rebound", "breakout", "bottom_accumulation"]
+    logic: "MAJORITY"
+    min_agree: 3  # 至少3个策略同意
+    description: "多数策略同意"

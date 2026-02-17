@@ -1,0 +1,97 @@
+# A股选股策略系统 - 系统配置
+
+# 数据源配置
+data_sources:
+  primary:
+    name: "tushare"
+    enabled: true
+    token: ""  # 请填写你的tushare token
+    timeout: 30
+
+  backup_1:
+    name: "akshare"
+    enabled: true
+    timeout: 30
+
+  backup_2:
+    name: "eastmoney"
+    enabled: false
+    timeout: 30
+
+  failover:
+    max_retries: 3
+    retry_delay: 5
+    auto_switch: true
+
+# 数据存储配置
+storage:
+  cache_enabled: true
+  db_path: "data/stock_data/stocks.db"
+  backup_enabled: true
+  backup_path: "data/backups/"
+  keep_backups_days: 30
+
+# 数据质量配置
+data_quality:
+  enable_validation: true
+  enable_cross_check: true
+  max_missing_ratio: 0.1  # 最大缺失比例10%
+  price_change_threshold: 0.2  # 价格异常波动阈值20%
+
+# 策略配置
+strategies:
+  config_path: "configs/strategies_config.yaml"
+  auto_reload: true
+  parallel_execution: true
+  max_workers: 4
+
+# 选股配置
+stock_picker:
+  market: "A_SHARE"  # A股市场
+  exclude_st: true  # 排除ST股票
+  exclude_suspended: true  # 排除停牌股票
+  exclude_delisted: true  # 排除退市股票
+  min_market_cap: 10  # 最小市值（亿）
+  max_stocks: 5000  # 最大处理股票数
+
+# 回测配置
+backtest:
+  enabled: true
+  initial_capital: 100000  # 初始资金
+  commission: 0.0003  # 手续费率（万三）
+  slippage: 0.001  # 滑点
+
+# 日志配置
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  console: true
+  file: true
+  file_path: "logs/stock_picker.log"
+  max_bytes: 10485760  # 10MB
+  backup_count: 5
+
+# 告警配置
+alerts:
+  enabled: true
+  wechat:
+    enabled: false
+    webhook_url: ""
+  email:
+    enabled: false
+    smtp_server: ""
+    smtp_port: 587
+    sender: ""
+    password: ""
+    recipients: []
+
+# 定时任务配置
+schedule:
+  pre_market:
+    enabled: false
+    time: "08:30"
+  during_market:
+    enabled: false
+    interval: 300  # 5分钟
+  post_market:
+    enabled: true
+    time: "15:30"

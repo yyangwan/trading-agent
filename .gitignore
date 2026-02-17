@@ -1,0 +1,40 @@
+# 敏感配置
+configs/system_config.yaml
+configs/strategies_config.yaml.local
+
+# 数据文件
+data/
+data/cache/
+data/backups/
+
+# 输出文件
+output/
+output/picks/
+output/backtests/
+
+# 日志文件
+logs/
+*.log
+
+# Python缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# 虚拟环境
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db
