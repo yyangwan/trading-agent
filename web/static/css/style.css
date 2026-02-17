@@ -1,0 +1,114 @@
+/* 自定义样式 */
+
+body {
+    background-color: #f8f9fa;
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: none;
+}
+
+.card-header {
+    font-weight: bold;
+}
+
+.strategy-item {
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.strategy-item:last-child {
+    border-bottom: none;
+}
+
+.strategy-name {
+    font-weight: bold;
+    color: #333;
+}
+
+.strategy-desc {
+    color: #666;
+    font-size: 0.9em;
+    margin-top: 5px;
+}
+
+.strategy-params {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    font-size: 0.85em;
+}
+
+.badge-enabled {
+    background-color: #28a745;
+}
+
+.badge-disabled {
+    background-color: #6c757d;
+}
+
+.stock-item {
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
+    transition: background-color 0.2s;
+}
+
+.stock-item:hover {
+    background-color: #f8f9fa;
+}
+
+.stock-item:last-child {
+    border-bottom: none;
+}
+
+.stock-name {
+    font-weight: bold;
+    color: #333;
+    font-size: 1.1em;
+}
+
+.stock-price {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.price-up {
+    color: #dc3545;
+}
+
+.price-down {
+    color: #28a745;
+}
+
+.stock-strategies {
+    margin-top: 8px;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 15px;
+}
+
+.stat-value {
+    font-size: 2em;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.empty-state i {
+    font-size: 3em;
+    margin-bottom: 15px;
+}
