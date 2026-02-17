@@ -1,29 +1,29 @@
 # A股选股策略系统 - 依赖包
 
-# 数据源
-tushare>=1.2.80
-akshare>=1.11.60
-
-# 数据处理
+# 核心数据处理
 pandas>=2.0.0
 numpy>=1.24.0
-
-# 技术指标
-TA-Lib>=0.4.28
-pandas-ta>=0.3.14b0
-
-# 数据库
-sqlite3  # Python内置
 
 # 配置文件
 pyyaml>=6.0
 
-# 图表（可选）
-matplotlib>=3.7.0
-plotly>=5.17.0
+# HTTP请求
+requests>=2.31.0
+
+# 进度条
+tqdm>=4.65.0
+
+# 数据源（可选，注释掉以避免安装问题）
+# tushare>=1.2.80
+# akshare>=1.11.60
+# pandas-ta>=0.3.14b0
+
+# 技术指标（使用ta-lib替代）
+# TA-Lib需要系统级依赖，先注释
+# talib>=0.4.28
 
 # 回测（可选）
-backtrader>=1.9.76
+# backtrader>=1.9.76
 
 # 定时任务
 schedule>=1.2.0
@@ -31,8 +31,6 @@ schedule>=1.2.0
 # 日志
 colorlog>=6.7.0
 
-# HTTP请求
-requests>=2.31.0
-
-# 进度条
-tqdm>=4.65.0
+# 图表（可选）
+# matplotlib>=3.7.0
+# plotly>=5.17.0
