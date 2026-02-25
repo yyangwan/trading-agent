@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A股选股系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card h3 {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .picks-section {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .picks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .picks-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .picks-table th,
+        .picks-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .picks-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .picks-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .positive {
+            color: #e74c3c;
+        }
+        
+        .negative {
+            color: #27ae60;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            background: #3498db;
+            color: white;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 A股选股策略系统</h1>
+            <p>基于技术分析的智能选股</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h3>股票数据</h3>
+                <div class="value" id="total-stocks">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>选出股票</h3>
+                <div class="value" id="picks-count">-</div>
+            </div>
+            <div class="stat-card">
+                <h3>启用策略</h3>
+                <div class="value" id="strategies-count">-</div>
+            </div>
+        </div>
+        
+        <div class="picks-section">
+            <div class="picks-header">
+                <h2>🎯 选股结果</h2>
+                <span class="badge" id="result-date">加载中...</span>
+            </div>
+            
+            <div id="picks-container">
+                <div class="loading">正在加载选股结果...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        async function fetchData(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error(`Error fetching ${url}:`, error);
+                return null;
+            }
+        }
+        
+        async function loadStatus() {
+            const data = await fetchData('/api/status');
+            if (data) {
+                document.getElementById('total-stocks').textContent = data.total_stocks || 0;
+                document.getElementById('picks-count').textContent = data.picks_count || 0;
+                document.getElementById('strategies-count').textContent = data.strategies_count || 0;
+            }
+        }
+        
+        async function loadPicks() {
+            const data = await fetchData('/api/picks');
+            if (!data) {
+                document.getElementById('picks-container').innerHTML = 
+                    '<div class="error">加载失败，请稍后刷新重试</div>';
+                return;
+            }
+            
+            document.getElementById('result-date').textContent = data.date || '-';
+            
+            if (!data.picks || data.picks.length === 0) {
+                document.getElementById('picks-container').innerHTML = 
+                    '<div class="loading">暂无选股结果</div>';
+                return;
+            }
+            
+            const table = document.createElement('table');
+            table.className = 'picks-table';
+            
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>股票代码</th>
+                        <th>收盘价</th>
+                        <th>涨跌幅</th>
+                        <th>策略</th>
+                        <th>评分</th>
+                        <th>止损</th>
+                        <th>止盈</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${data.picks.map(pick => `
+                        <tr>
+                            <td><strong>${pick.ts_code}</strong></td>
+                            <td>¥${pick.close ? pick.close.toFixed(2) : '-'}</td>
+                            <td class="${pick.change_pct >= 0 ? 'positive' : 'negative'}">
+                                ${pick.change_pct >= 0 ? '+' : ''}${pick.change_pct ? pick.change_pct.toFixed(2) : '-'}%
+                            </td>
+                            <td><span class="badge">${pick.matched_strategies || '-'}</span></td>
+                            <td>${pick.avg_score ? pick.avg_score.toFixed(1) : '-'}</td>
+                            <td class="negative">${(pick.stop_loss * 100).toFixed(1)}%</td>
+                            <td class="positive">${(pick.take_profit * 100).toFixed(1)}%</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+            
+            document.getElementById('picks-container').innerHTML = '';
+            document.getElementById('picks-container').appendChild(table);
+        }
+        
+        // 初始加载
+        loadStatus();
+        loadPicks();
+        
+        // 每30秒刷新
+        setInterval(() => {
+            loadStatus();
+            loadPicks();
+        }, 30000);
+    </script>
+</body>
+</html>
