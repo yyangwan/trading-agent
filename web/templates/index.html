@@ -2,106 +2,114 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A股选股策略系统</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A股选股系统</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f5f5f5; padding-bottom: 70px; }
+        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px 15px; text-align: center; }
+        .header h1 { font-size: 1.5rem; margin-bottom: 5px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; margin-top: -10px; }
+        .stat-card { background: white; border-radius: 12px; padding: 15px 10px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .stat-card .label { font-size: 0.75rem; color: #666; }
+        .stat-card .value { font-size: 1.5rem; font-weight: 700; color: #667eea; }
+        .picks-section { padding: 15px; }
+        .stock-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border-left: 4px solid #667eea; }
+        .stock-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .stock-code { font-size: 1.1rem; font-weight: 700; }
+        .stock-price { font-size: 1.3rem; font-weight: 700; color: #667eea; }
+        .stock-info { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .info-item { display: flex; flex-direction: column; }
+        .info-label { font-size: 0.75rem; color: #999; }
+        .info-value { font-size: 0.95rem; font-weight: 500; }
+        .positive { color: #e74c3c; }
+        .negative { color: #27ae60; }
+        .strategy-badge { background: #f0f0f0; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; }
+        .loading { text-align: center; padding: 40px; color: #999; }
+        .refresh-btn { position: fixed; bottom: 70px; right: 20px; background: #667eea; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4); cursor: pointer; }
+    </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">
-                <i class="bi bi-graph-up-arrow"></i>
-                A股选股策略系统
-            </a>
-            <div class="ms-auto">
-                <span class="text-white-50" id="currentTime"></span>
-            </div>
+    <div class="header">
+        <h1>📊 A股选股</h1>
+    </div>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="label">股票数据</div>
+            <div class="value" id="total-stocks">-</div>
         </div>
-    </nav>
-
-    <div class="container-fluid mt-4">
-        <div class="row">
-            <!-- 左侧：策略配置 -->
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
-                            <i class="bi bi-gear-fill"></i>
-                            策略配置
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="strategyList">
-                            <div class="text-center text-muted">
-                                <div class="spinner-border" role="status"></div>
-                                <p>加载中...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 系统状态 -->
-                <div class="card mt-3">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0">
-                            <i class="bi bi-info-circle-fill"></i>
-                            系统状态
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="systemStatus">
-                            <div class="text-center text-muted">
-                                <div class="spinner-border spinner-border-sm" role="status"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 右侧：选股结果 -->
-            <div class="col-md-8">
-                <div class="card">
-                    <div class="card-header bg-warning text-dark">
-                        <h5 class="mb-0">
-                            <i class="bi bi-bar-chart-fill"></i>
-                            最新选股结果
-                            <span id="pickDate" class="badge bg-secondary ms-2"></span>
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="pickResults">
-                            <div class="text-center text-muted">
-                                <div class="spinner-border" role="status"></div>
-                                <p>加载中...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 历史记录 -->
-                <div class="card mt-3">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0">
-                            <i class="bi bi-calendar-range"></i>
-                            历史选股记录
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <select class="form-select" id="dateSelector">
-                                <option value="">选择日期...</option>
-                            </select>
-                        </div>
-                        <div id="historyResults"></div>
-                    </div>
-                </div>
-            </div>
+        <div class="stat-card">
+            <div class="label">选出股票</div>
+            <div class="value" id="picks-count">-</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">策略数量</div>
+            <div class="value" id="strategies-count">-</div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <div class="picks-section">
+        <h2 style="margin-bottom: 15px;">🎯 选股结果</h2>
+        <div id="picks-container">
+            <div class="loading">正在加载...</div>
+        </div>
+    </div>
+    <div class="refresh-btn" onclick="loadData()">🔄</div>
+    <script>
+        async function fetchData(url) {
+            try {
+                const response = await fetch(url);
+                return await response.json();
+            } catch (error) {
+                return null;
+            }
+        }
+        async function loadStatus() {
+            const data = await fetchData('/api/status');
+            if (data) {
+                document.getElementById('total-stocks').textContent = data.total_stocks || 0;
+                document.getElementById('picks-count').textContent = data.picks_count || 0;
+                document.getElementById('strategies-count').textContent = data.strategies_count || 0;
+            }
+        }
+        async function loadPicks() {
+            const data = await fetchData('/api/picks');
+            const container = document.getElementById('picks-container');
+            if (!data || !data.picks || data.picks.length === 0) {
+                container.innerHTML = '<div class="loading">暂无选股结果</div>';
+                return;
+            }
+            container.innerHTML = data.picks.map(pick => `
+                <div class="stock-card">
+                    <div class="stock-header">
+                        <div class="stock-code">${pick.ts_code}</div>
+                        <div class="stock-price">¥${pick.close.toFixed(2)}</div>
+                    </div>
+                    <div class="stock-info">
+                        <div class="info-item">
+                            <div class="info-label">涨跌幅</div>
+                            <div class="info-value ${pick.change_pct >= 0 ? 'positive' : 'negative'}">
+                                ${pick.change_pct >= 0 ? '+' : ''}${pick.change_pct.toFixed(2)}%
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">策略</div>
+                            <div class="info-value"><span class="strategy-badge">${pick.matched_strategies}</span></div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">评分</div>
+                            <div class="info-value">${pick.avg_score.toFixed(1)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">成交量</div>
+                            <div class="info-value">${(pick.volume / 10000).toFixed(2)}万</div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        function loadData() { loadStatus(); loadPicks(); }
+        loadData();
+        setInterval(loadData, 30000);
+    </script>
 </body>
 </html>
